@@ -24,6 +24,7 @@ export default function Scene() {
           powerPreference: "high-performance",
         }}
         camera={{ position: [0, 0, 5], fov: 45, near: 1, far: 1000 }}
+        shadows
       >
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />
