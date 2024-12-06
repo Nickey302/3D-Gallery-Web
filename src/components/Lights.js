@@ -1,6 +1,6 @@
 import { useHelper } from '@react-three/drei'
 import { useRef } from 'react'
-import { DirectionalLightHelper, SpotLightHelper } from 'three'
+import { DirectionalLightHelper, SpotLightHelper, PointLightHelper } from 'three'
 
 export default function Lights() {
   // 조명에 대한 ref 생성
@@ -8,6 +8,12 @@ export default function Lights() {
   const directionalRef2 = useRef()
   const spotRef1 = useRef()
   const spotRef2 = useRef()
+  const directionalRef3 = useRef()
+  const directionalRef4 = useRef()
+  const pointRef1 = useRef()
+  const pointRef2 = useRef()
+  const pointRef3 = useRef()
+  const pointRef4 = useRef()
 
   const colors = [
     '#FFECDA', // 1-4
@@ -23,6 +29,11 @@ export default function Lights() {
   useHelper(directionalRef2, DirectionalLightHelper, 1, '#FFB395')
   useHelper(spotRef1, SpotLightHelper, '#FF7B00')
   useHelper(spotRef2, SpotLightHelper, '#0040FF')
+  useHelper(directionalRef3, DirectionalLightHelper, 1, '#E100FF')
+  useHelper(directionalRef4, DirectionalLightHelper, 1, '#FFECDA')
+  useHelper(pointRef2, PointLightHelper, 1, '#FFECDA')
+  useHelper(pointRef3, PointLightHelper, 1, '#E100FF')
+  useHelper(pointRef4, PointLightHelper, 1, '#FFECDA')
 
   return (
     <>
@@ -32,7 +43,6 @@ export default function Lights() {
         intensity={0.7}
         color="#FFECDA"
         castShadow
-        shadow-mapSize={[256, 256]}
       />
       
       <directionalLight 
@@ -42,7 +52,6 @@ export default function Lights() {
         rotation={[0, Math.PI / 2, 0]}
         color="#FFB395"
         castShadow
-        shadow-mapSize={[256, 256]}
       />
 
       <spotLight 
@@ -57,7 +66,7 @@ export default function Lights() {
         shadow-mapSize={[256, 256]}
       />
 
-      <spotLight 
+      {/* <spotLight 
         ref={spotRef2}
         position={[3.7, 1.73, 5]}
         angle={Math.PI / 2}
@@ -67,6 +76,40 @@ export default function Lights() {
         color="#0040FF"
         castShadow
         shadow-mapSize={[256, 256]}
+      /> */}
+
+      <directionalLight 
+        ref={directionalRef3}
+        position={[0, 1, 10]}
+        rotation={[0, -Math.PI / 2, 0]}
+        intensity={0.3}
+        color="##FFECDA"
+        castShadow
+      />
+
+      <directionalLight 
+        ref={directionalRef4}
+        position={[0, 1, -10]}
+        intensity={0.3}
+        color="#FFECDA"
+        castShadow
+      />
+
+      <pointLight 
+        ref={pointRef3}
+        position={[-3.3, 1.5, 21.1]}
+        intensity={3.0}
+        color="#E1ccff"
+        castShadow
+        distance={20}
+        decay={2}
+      />
+
+      <directionalLight
+        position={[3, 1.5, 21.1]}
+        intensity={0.3}
+        color="#FFECDA"
+        castShadow
       />
 
       <ambientLight intensity={0.3} />

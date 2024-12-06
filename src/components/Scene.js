@@ -1,5 +1,3 @@
-'use client'
-
 import { Canvas } from '@react-three/fiber'
 import {
   PerformanceMonitor,
@@ -23,7 +21,7 @@ export default function Scene() {
           antialias: true,
           powerPreference: "high-performance",
         }}
-        camera={{ position: [0, 0, 5], fov: 45, near: 1, far: 1000 }}
+        camera={{ position: [0, 0, 5], fov: 45, near: 0.01, far: 100 }}
         shadows
       >
         <AdaptiveDpr pixelated />
@@ -36,7 +34,7 @@ export default function Scene() {
             setDpr(1)
           }}>
 
-          {/* <color attach="background" args={['#000000']} /> */}
+          {/* <color attach="background" args={['#ffffff']} /> */}
 
           <Suspense fallback={"Loading"}>
             <Experience />
