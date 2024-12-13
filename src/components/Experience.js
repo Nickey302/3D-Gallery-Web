@@ -5,10 +5,13 @@ import { Gallery } from "./Gallery"
 import Lights from "./Lights"
 import Controller from './Controller'
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
+import { Perf } from "r3f-perf"
 
 export default function Experience() {
   return (
     <>
+      {/* <Perf /> */}
+    
       <Environment
         preset="night"
         background

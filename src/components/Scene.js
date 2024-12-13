@@ -33,10 +33,7 @@ export default function Scene() {
               onDecline={() => {
             setDpr(1)
           }}>
-
-          {/* <color attach="background" args={['#ffffff']} /> */}
-
-          <Suspense fallback={"Loading"}>
+          <Suspense fallback={null}>
             <Experience />
           </Suspense>
         </PerformanceMonitor>
