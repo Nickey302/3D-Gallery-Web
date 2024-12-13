@@ -21,7 +21,7 @@ const formSchema = z.object({
 })
 
 export function ArtworkUploadForm() {
-  const { closeModal } = useUploadStore()
+  const { closeModal, selectedFrame } = useUploadStore()
   const [preview, setPreview] = useState(null)
   
   const form = useForm({
@@ -78,16 +78,17 @@ export function ArtworkUploadForm() {
             medium: values.medium,
             file_url: publicUrl,
             is_displayed: true,
-            user_id: user.id
+            user_id: user.id,
+            frame_index: selectedFrame
           }
         ])
 
       if (insertError) throw insertError
 
-      toast.success('작품이 업로드되었습니다')
+      toast.success('Artwork uploaded successfully')
       closeModal()
     } catch (error) {
-      toast.error('업로드에 실패했습니다')
+      toast.error('Upload failed')
       console.error(error)
     }
   }

@@ -1,5 +1,3 @@
-'use client'
-
 import { useGLTF } from '@react-three/drei'
 import { Artwork2d } from './Artwork2d'
 
@@ -519,14 +517,14 @@ export function Gallery(props) {
         geometry={nodes.Sky_volume.geometry}
         material={materials['Sky volume']}
       />
-      <mesh
+      {/* <mesh
         castShadow
         receiveShadow
         geometry={nodes.SHC_Modern_Procedural_Art1280.geometry}
         material={materials['Procedural art.003']}
         position={[37.868, 20.613, -62.551]}
         scale={1.873}
-      />
+      /> */}
       {/**
        * PlaneGeometry Gallery
        */}

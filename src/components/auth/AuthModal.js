@@ -13,12 +13,12 @@ export function AuthModal() {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>계정</DialogTitle>
+          <DialogTitle>Account</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">로그인</TabsTrigger>
-            <TabsTrigger value="signup">회원가입</TabsTrigger>
+            <TabsTrigger value="signin">Login</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
             <SignInForm />
