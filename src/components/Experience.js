@@ -25,10 +25,10 @@ export default function Experience() {
       />
 
       <PointerLockControls />
+      <Controller />
 
       <Lights />
       <Gallery position={[-50, -20.5, 50]} />
-      <Controller />
       <PostPro />
     </>
   )

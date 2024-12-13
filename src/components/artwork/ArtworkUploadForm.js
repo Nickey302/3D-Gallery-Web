@@ -48,13 +48,43 @@ export function ArtworkUploadForm() {
 
   async function onSubmit(values) {
     try {
+      // frame_index가 undefined인 경우 체크
+      if (selectedFrame === undefined || selectedFrame === null) {
+        toast.error('프레임을 선택해주세요')
+        return
+      }
+
+      // frame_index를 숫자로 변환
+      const frameIndex = Number(selectedFrame)
+
+      // 먼저 frame_index 중복 체크
+      const { data: existingArtwork, error: checkError } = await supabase
+        .from('artworks')
+        .select('id')
+        .eq('frame_index', frameIndex)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError
+      }
+
+      if (existingArtwork) {
+        toast.error('이미 작품이 있는 프레임입니다')
+        return
+      }
+
       const file = values.file
+      if (!file) {
+        toast.error('파일을 선택해주세요')
+        return
+      }
+
       const fileExt = file.name.split('.').pop()
       const fileName = `${Math.random()}.${fileExt}`
       const filePath = `${fileName}`
 
       // 파일 업로드
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('artworks')
         .upload(filePath, file)
 
@@ -69,27 +99,27 @@ export function ArtworkUploadForm() {
       const { data: { user } } = await supabase.auth.getUser()
 
       // 작품 정보 저장
+      const artworkData = {
+        title: values.title,
+        description: values.description,
+        medium: values.medium,
+        file_url: publicUrl,
+        is_displayed: true,
+        user_id: user.id,
+        frame_index: frameIndex
+      }
+
       const { error: insertError } = await supabase
         .from('artworks')
-        .insert([
-          {
-            title: values.title,
-            description: values.description,
-            medium: values.medium,
-            file_url: publicUrl,
-            is_displayed: true,
-            user_id: user.id,
-            frame_index: selectedFrame
-          }
-        ])
+        .insert([artworkData])
 
       if (insertError) throw insertError
 
-      toast.success('Artwork uploaded successfully')
+      toast.success('작품이 업로드되었습니다')
       closeModal()
     } catch (error) {
-      toast.error('Upload failed')
-      console.error(error)
+      console.error('Upload error:', error)
+      toast.error('업로드에 실패했습니다')
     }
   }
 

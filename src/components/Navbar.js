@@ -15,7 +15,6 @@ export function Navbar() {
         <div className="space-x-2">
           {user ? (
             <>
-              <Button onClick={openUploadModal}>Upload Artwork</Button>
               <Button variant="outline" onClick={signOut}>Logout</Button>
             </>
           ) : (

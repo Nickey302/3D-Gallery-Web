@@ -13,6 +13,7 @@ export function Artwork2d() {
   const [artworks, setArtworks] = useState([])
   const [hoveredFrame, setHoveredFrame] = useState(null)
   const [showArtworkInfo, setShowArtworkInfo] = useState(false)
+  const [currentArtwork, setCurrentArtwork] = useState(null)
   const { camera } = useThree()
   const { openModal } = useUploadStore()
 
@@ -27,18 +28,46 @@ export function Artwork2d() {
         console.error('Error fetching artworks:', error)
         return
       }
-      setArtworks(data)
+      
+      // artworks 배열을 frame_index를 ���준으로 정렬
+      const sortedArtworks = new Array(54).fill(null) // 총 프레임 수만큼의 배열 생성
+      data.forEach(artwork => {
+        if (artwork.frame_index !== null && artwork.frame_index !== undefined) {
+          sortedArtworks[artwork.frame_index] = artwork
+        }
+      })
+      
+      setArtworks(sortedArtworks)
+      console.log('Fetched artworks:', sortedArtworks) // 디버깅용
     }
     fetchArtworks()
   }, [])
 
   const textureUrls = useMemo(() => {
-    return artworks
-      .filter(artwork => artwork?.file_url)
-      .map(artwork => artwork.file_url)
+    // 54개의 null로 채워진 배열 생성
+    const urls = new Array(54).fill(null)
+    
+    // 각 artwork의 frame_index에 맞는 위치에 file_url 할당
+    artworks.forEach(artwork => {
+      if (artwork?.file_url && artwork?.frame_index !== undefined) {
+        urls[artwork.frame_index] = artwork.file_url
+      }
+    })
+    
+    // null이 아닌 URL만 필터링하여 반환
+    return urls.filter(url => url !== null)
   }, [artworks])
 
   const textures = useTexture(textureUrls)
+
+  // texture 매핑을 위한 헬퍼 함수 추가
+  const getTextureForFrame = useCallback((frameIndex) => {
+    const artwork = artworks[frameIndex]
+    if (!artwork?.file_url) return null
+    
+    const textureIndex = textureUrls.indexOf(artwork.file_url)
+    return textureIndex !== -1 ? textures[textureIndex] : null
+  }, [artworks, textureUrls, textures])
 
   const createMaterial = useCallback((texture) => {
     if (texture) {
@@ -115,28 +144,27 @@ export function Artwork2d() {
     'SHC_Modern_Procedural_Art1332': { rotation: [0, 0, 0], normal: [0, 0, -2] }
   }
   
-  // 레이캐스터를 사용하여 프레임과의 거리 확인
+  // 레이캐스터를 사��하여 프레임과의 거리 확인
   useFrame(() => {
     if (hoveredFrame) {
-      // Gallery의 position을 고려한 실제 프레임 위치 계산
       const galleryOffset = new THREE.Vector3(-50, -20.5, 50)
       const absoluteFramePosition = hoveredFrame.position.clone().add(galleryOffset)
-      
-      // 카메라와 프레임 사이의 실제 거리 계산
       const distance = camera.position.distanceTo(absoluteFramePosition)
       
-      // 거리가 임계값보다 작으면 상호작용 활성화
-      if (distance < 3) { // 임계값 조정 가능
-        const artwork = artworks[hoveredFrame.frameIndex]
-        console.log('Artwork at frame:', artwork) // 작품 데이터 디버깅
+      if (distance < 3) {
+        const frameIndex = hoveredFrame.frameIndex
+        const artwork = artworks[frameIndex]
         
         if (artwork) {
+          setCurrentArtwork(artwork)
           setShowArtworkInfo(true)
         } else {
-          openModal(hoveredFrame.frameIndex)
+          setCurrentArtwork(null)
+          openModal(frameIndex)
         }
       } else {
         setShowArtworkInfo(false)
+        setCurrentArtwork(null)
       }
     }
   })
@@ -146,12 +174,19 @@ export function Artwork2d() {
       <group>
         {Object.entries(nodes).map(([key, node]) => {
           if (key.includes('SHC_Modern_Procedural_Art')) {
-            const frameIndex = artworks.findIndex((_, index) => {
-              if (index === 0) return key === 'SHC_Modern_Procedural_Art218'
-              return key === `SHC_Modern_Procedural_Art${1280 + index}`
-            })
-            
-            const texture = textures[frameIndex]
+            let frameIndex
+            if (key === 'SHC_Modern_Procedural_Art218') {
+              frameIndex = 0
+            } else {
+              const numberMatch = key.match(/Art(\d+)/)
+              if (numberMatch) {
+                const artNumber = parseInt(numberMatch[1])
+                frameIndex = artNumber - 1279
+              }
+            }
+
+            // texture 가져오기를 수정된 헬퍼 함수 사용
+            const texture = getTextureForFrame(frameIndex)
             const frameSettings = debugFrameSettings[key] || { rotation: [0, 0, 0], normal: [0, 0, 1] }
 
             // 프레임보다 살짝 앞에 위치하도록 조정
@@ -165,23 +200,22 @@ export function Artwork2d() {
             const frameSize = new THREE.Box3().setFromObject(node)
             let width, height
 
-            // 측면을 바라보는 프레임인 경우 (x축 방향 normal)
             if (Math.abs(frameSettings.normal[0]) >= 0.999) {
-              // z와 y 크기를 사용
               width = frameSize.max.z - frameSize.min.z
               height = frameSize.max.y - frameSize.min.y
             } else {
-              // 정면이나 후면을 바라보는 프레임
               width = frameSize.max.x - frameSize.min.x
               height = frameSize.max.y - frameSize.min.y
             }
 
             const artwork = artworks[frameIndex]
             
+            // console.log('Frame mapping:', { key, frameIndex, hasArtwork: !!artwork }) // 디버깅용
+            
             return (
               <group 
                 key={key}
-                onClick={(e) => { // onClick 이벤트 추가
+                onClick={(e) => {
                   e.stopPropagation()
                   setHoveredFrame({ position: node.position, frameIndex })
                 }}
@@ -219,13 +253,13 @@ export function Artwork2d() {
           return null
         })}
       </group>
-      {/* UI 컴포넌트들을 group 밖으로 이동 */}
-      {hoveredFrame && (
+      {showArtworkInfo && currentArtwork && (
         <ArtworkInfo 
-          artwork={artworks[hoveredFrame.frameIndex]}
+          artwork={currentArtwork}
           isOpen={showArtworkInfo}
           onClose={() => {
             setShowArtworkInfo(false)
+            setCurrentArtwork(null)
             setHoveredFrame(null)
           }}
         />
