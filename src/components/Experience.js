@@ -5,9 +5,11 @@ import { Gallery } from "./Gallery"
 import Lights from "./Lights"
 import Controller from './Controller'
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
-import { Perf } from "r3f-perf"
+import { useControlsStore } from '@/stores/controlsStore'
 
 export default function Experience() {
+  const { isControlsEnabled } = useControlsStore()
+
   return (
     <>
       {/* <Perf /> */}
@@ -24,8 +26,12 @@ export default function Experience() {
         sunPosition={[-1, -0.1, 0]}
       />
 
-      <PointerLockControls />
-      <Controller />
+      {isControlsEnabled && (
+        <>
+          <PointerLockControls />
+          <Controller />
+        </>
+      )}
 
       <Lights />
       <Gallery position={[-50, -20.5, 50]} />

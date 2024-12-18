@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/authStore'
+import { useControlsStore } from '@/stores/controlsStore'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -17,7 +19,13 @@ const formSchema = z.object({
 
 export function SignInForm() {
   const { closeModal, setUser } = useAuthStore()
-  
+  const { enableControls, disableControls } = useControlsStore()
+
+  useEffect(() => {
+    disableControls()
+    return () => enableControls()
+  }, [disableControls, enableControls])
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {

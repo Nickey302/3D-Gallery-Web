@@ -5,12 +5,17 @@ import localFont from 'next/font/local'
 const myFont = localFont({
   src: [
     {
-      path: './fonts/Facade-Est.woff',
-      weight: '900',
-      style: 'bold',
-    }
+      path: './fonts/NotoSansKR-ExtraLight.ttf',
+      weight: '100',
+      style: 'normal',
+    },
+    // {
+    //   path: './fonts/NotoSansKR-Light.ttf',
+    //   weight: '200',
+    //   style: 'normal',
+    // }
   ],
-  variable: '--font-facade' // Tailwind에서 사용할 변수명
+  variable: '--font-steps' // Tailwind에서 사용할 변수명
 })
 
 export const metadata = {

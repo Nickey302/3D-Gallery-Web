@@ -16,13 +16,14 @@ import Image from 'next/image'
 const formSchema = z.object({
   title: z.string().min(1, '제목을 입력해주세요'),
   description: z.string().min(1, '작품 설명을 입력해주세요'),
-  medium: z.string().min(1, '매체를 입력해주세요'),
+  medium: z.string().min(1, '아티스트의 이름이나 계정을 입력해주세요'),
   file: z.any()
 })
 
 export function ArtworkUploadForm() {
   const { closeModal, selectedFrame } = useUploadStore()
   const [preview, setPreview] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
   
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -48,70 +49,71 @@ export function ArtworkUploadForm() {
 
   async function onSubmit(values) {
     try {
-      // frame_index가 undefined인 경우 체크
+      setIsUploading(true)
+
+      // frame_index 체크
       if (selectedFrame === undefined || selectedFrame === null) {
         toast.error('프레임을 선택해주세요')
         return
       }
 
-      // frame_index를 숫자로 변환
       const frameIndex = Number(selectedFrame)
 
-      // 먼저 frame_index 중복 체크
-      const { data: existingArtwork, error: checkError } = await supabase
-        .from('artworks')
-        .select('id')
-        .eq('frame_index', frameIndex)
-        .single()
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError
-      }
-
-      if (existingArtwork) {
-        toast.error('이미 작품이 있는 프레임입니다')
-        return
-      }
-
+      // 파일 체크
       const file = values.file
       if (!file) {
         toast.error('파일을 선택해주세요')
         return
       }
 
+      // 현재 사용자 확인
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+
+      // frame_index 중복 체크 수정
+      const { data: existingArtwork, error: checkError } = await supabase
+        .from('artworks')
+        .select('id')
+        .eq('frame_index', frameIndex)
+
+      if (checkError) throw checkError
+
+      if (existingArtwork?.length > 0) {
+        toast.error('이미 작품이 있는 프레임입니다')
+        return
+      }
+
+      // 파일 업로드 전 이름 및 경로 설정
       const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
 
       // 파일 업로드
       const { error: uploadError } = await supabase.storage
         .from('artworks')
-        .upload(filePath, file)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
 
       if (uploadError) throw uploadError
 
       // 파일 URL 가져오기
       const { data: { publicUrl } } = supabase.storage
         .from('artworks')
-        .getPublicUrl(filePath)
-
-      // 현재 로그인한 사용자 정보 가져오기
-      const { data: { user } } = await supabase.auth.getUser()
+        .getPublicUrl(fileName)
 
       // 작품 정보 저장
-      const artworkData = {
-        title: values.title,
-        description: values.description,
-        medium: values.medium,
-        file_url: publicUrl,
-        is_displayed: true,
-        user_id: user.id,
-        frame_index: frameIndex
-      }
-
       const { error: insertError } = await supabase
         .from('artworks')
-        .insert([artworkData])
+        .insert([{
+          title: values.title,
+          description: values.description,
+          medium: values.medium,
+          file_url: publicUrl,
+          is_displayed: true,
+          user_id: user.id,
+          frame_index: frameIndex
+        }])
 
       if (insertError) throw insertError
 
@@ -119,7 +121,9 @@ export function ArtworkUploadForm() {
       closeModal()
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('업로드에 실패했습니다')
+      toast.error('업로드에 실패했습니다: ' + error.message)
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -157,7 +161,7 @@ export function ArtworkUploadForm() {
           name="medium"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>매체</FormLabel>
+              <FormLabel>아티스트</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -188,7 +192,13 @@ export function ArtworkUploadForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">업로드</Button>
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={isUploading}
+        >
+          {isUploading ? '업로드 중...' : '업로드'}
+        </Button>
       </form>
     </Form>
   )
