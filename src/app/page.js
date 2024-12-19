@@ -5,6 +5,7 @@ import Scene from '@/components/Scene'
 import { Navbar } from '@/components/Navbar'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { UploadArtworkModal } from '@/components/artwork/UploadArtworkModal'
+import { Upload3dModal } from '@/components/modals/Upload3dModal'
 import { Toaster } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -21,6 +22,7 @@ export default function Page() {
       <Scene />
       <AuthModal />
       <UploadArtworkModal />
+      <Upload3dModal />
       <Toaster />
     </div>
   )

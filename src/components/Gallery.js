@@ -1,5 +1,6 @@
 import { useGLTF } from '@react-three/drei'
 import { Artwork2d } from './Artwork2d'
+import { Artwork3d } from './Artwork3d'
 
 export function Gallery(props) {
   const { nodes, materials } = useGLTF('/models/ModernArtGalleryandPhotoStudioNIGHT.glb')
@@ -517,24 +518,8 @@ export function Gallery(props) {
         geometry={nodes.Sky_volume.geometry}
         material={materials['Sky volume']}
       />
-      {/* <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.SHC_Modern_Procedural_Art1280.geometry}
-        material={materials['Procedural art.003']}
-        position={[37.868, 20.613, -62.551]}
-        scale={1.873}
-      /> */}
-      {/**
-       * PlaneGeometry Gallery
-       */}
       <Artwork2d />
-      
-      {/**
-       * PlaneGeometry Gallery
-       */}
-
-      {/* GalleryEnd */}
+      <Artwork3d />
       <mesh
         castShadow
         receiveShadow

@@ -1,5 +1,6 @@
 import './globals.css'
 import localFont from 'next/font/local'
+import { ModelTransformControls } from '@/components/artwork/ModelTransformControls'
 
 // 로컬 폰트 설정
 const myFont = localFont({
@@ -25,9 +26,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={myFont.variable}>
+    <html lang="ko">
       <body>
         {children}
+        <ModelTransformControls />
       </body>
     </html>
   );

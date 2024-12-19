@@ -85,7 +85,16 @@ export function UploadArtworkModal() {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent 
         className="sm:max-w-[425px]"
-        showClose={false}
+        showClose={true}
+        // onPointerDownOutside={(e) => {
+        //   // 모달 외부 클릭 시 모달이 닫히는 것을 방지하되,
+        //   // 이벤트 전파는 허용하여 다른 상호작용이 가능하도록 함
+        //   e.preventDefault()
+        // }}
+        onEscapeKeyDown={(e) => {
+          // ESC 키로 모달이 닫히는 것을 방지
+          e.preventDefault()
+        }}
       >
         {!showConfirm ? (
           <div className="flex flex-col gap-4 p-4">
